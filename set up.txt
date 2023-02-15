@@ -1,0 +1,63 @@
+ 
+Procfile
+@@ -0,0 +1 @@
+web: sh setup.sh && heroku run App.py
+ 11  
+requirements.txt
+@@ -0,0 +1,11 @@
+numpy==1.21.5
+pandas==1.4.2
+matplotlib==3.5.1
+auto-ts==0.0.68
+streamlit==1.14.0
+openpyxl==3.0.10
+pickle-mixin==1.0.2
+scikit-learn==1.0.2
+streamlit-option-menu==0.3.2
+pmdarima==1.8.5
+openpylx==3.0.9
+ 13  
+setup.sh
+@@ -0,0 +1,13 @@
+mkdir -p ~/.streamlit/
+
+echo "\
+[general]\n\
+email = \"your-email@domain.com\"\n\
+" > ~/.streamlit/credentials.toml
+
+echo "\
+[server]\n\
+headless = true\n\
+enableCORS=false\n\
+port = $PORT\n\
+" > ~/.streamlit/config.toml
+ 26  
+untitled0.py
+@@ -0,0 +1,26 @@
+import pandas as pd
+import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing # SES
+from statsmodels.tsa.holtwinters import Holt # Holts Exponential Smoothing
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+st.title('Forecast of Cement Sales')
+uploaded_file = st.file_uploader(r"C:\Users\ch\OneDrive\Desktop\Cement.xlsx", type=['xlsx'])
+
+if uploaded_file is not None:     
+    cement = pd.read_excel(uploaded_file)
+    cement['Date'] = cement['Date'].apply(lambda x: x.strftime('%B-%Y'))
+
+    hwe_model_mul_add = ExponentialSmoothing(cement["Sales"][:71], seasonal = "mul", trend = "add", seasonal_periods = 12).fit()
+
+    newdata_pred = hwe_model_mul_add.predict(start = cement.index[0], end = cement.index[-1])
+
+    st.subheader("For exponential model")
+
+    st.write("Sales Forecast: ", newdata_pred)
+
+
+    st.subheader("Thanks for visit.")
